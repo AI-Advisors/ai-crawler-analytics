@@ -4,9 +4,13 @@
 
 One Google Tag Manager **server-side** tag template, published free in Google's Community Template Gallery by AI-Advisors. It classifies AI crawler, AI agent, and AI referral activity into three GA4 events.
 
-**Why it exists is not the product.** It is a distribution play. Stape reached Authority Score 42 on 1.4M backlinks, 97% of them "Frame" links propagating from one open-source GTM template in this same gallery. A prior-art scan on 2026-07-30 verified the gap: 0 of 1,629 gallery templates treat AI crawlers as a positive signal rather than noise to exclude. Every install carries an embedded reference back. That is the mechanism, and it is the only lever in the AI-Advisors P0 recovery plan that earns links without needing anyone's permission or validation.
+**Why it exists is not the product.** It is a distribution play. A prior-art scan on 2026-07-30 verified the gap: 0 of 1,629 gallery templates treat AI crawlers as a positive signal rather than noise to exclude.
 
-So: **installs and credibility are the goal.** A feature that adds an install is worth more than a feature that adds capability. A claim that costs credibility costs more than any feature is worth.
+**The mechanism, stated correctly.** A gallery template does **not** put a backlink on the site that installs it. Verified by reading stape's own gallery template source: every occurrence of "stape" in it is the brand name in the INFO block or an internal event-name mapping. What a gallery template actually earns is measured in our own CI research: for the pixel-install query, the retrieval engines consolidated on stape's template as THE recommended method and cited it on **all 5 retrieval engines**, while our deeper, fresher, better-schema'd blog post was cited on Claude only. The artifact becomes the cited answer. Add gallery visibility and a linkable GitHub repo.
+
+An earlier version of this file attributed stape's 1.4M "Frame" backlinks to template embeds. That was wrong; those are iframe links, most plausibly from stape's hosted sGTM containers, which is their actual business. **Do not project backlink volume from this template. Project citations and installs.**
+
+So: **installs, citations, and credibility are the goal.** A feature that adds an install is worth more than a feature that adds capability. A claim that costs credibility costs more than any feature is worth.
 
 Status: submitted to the gallery 2026-07-30, pending review. Marketing site: `~/Projects/ai-advisors` (separate repo, separate CLAUDE.md).
 
