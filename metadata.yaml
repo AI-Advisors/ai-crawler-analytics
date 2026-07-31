@@ -1,0 +1,5 @@
+homepage: "https://www.ai-advisors.ai"
+documentation: "https://github.com/AI-Advisors/ai-crawler-analytics#readme"
+versions:
+  - sha: 7fdd2f80ebbd6cfd9ce3efe3b34fbc7231c27a35
+    changeNotes: Initial release.
