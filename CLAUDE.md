@@ -58,6 +58,7 @@ Both suites must be updated together. The Node harness asserts against parsed `g
 
 ## Release process
 
+0. Know which half you are shipping. **The gallery serves only `template.tpl`, pinned by the `metadata.yaml` sha; snippets and README are consumed from GitHub directly.** So snippet/README/CLAUDE.md changes ship on push alone with NO metadata entry, and a `template.tpl` change is invisible to installers until its sha lands in `metadata.yaml`. (Learned 2026-08-12 when the Step B fix turned out to need no sha bump at all.)
 1. Edit `template.tpl`, update **both** test suites, run `node test/run-tests.mjs`.
 2. Import into a GTM **server** container and run the in-editor tests. A throwaway container works: decline the tagging-server provisioning prompt, it costs nothing and the test runner does not need one.
 3. Commit. Then prepend a new entry to `metadata.yaml` `versions:` with the **new** template.tpl commit sha, newest first. The sha must point at the commit containing the template, not the metadata commit.
@@ -67,6 +68,20 @@ Commits author as `kevin@ai-advisors.ai`. The org handle is permanently exposed 
 
 ## Open items
 
-- **Unverified and load-bearing:** whether sGTM's built-in Measurement Protocol client accepts the Step B snippet's secret-less POST to `/mp/collect`, and whether GA4 keeps events whose params carry bot UA strings. Both need a live tagging server (Stape's free tier is the cheap route). The first one gates the headline feature; a failure ships as a sha bump.
+- **RESOLVED 2026-08-12, and the failure was real: a default server container does NOT claim a JSON POST to `/mp/collect`.** Tested on a live tagging server (Google's `gtm-cloud-image:stable` on Cloud Run, this container's config): the original snippets' ping returned 400, byte-identical in behaviour to a nonsense path, with or without `measurement_id`/`api_secret`; the GA4 wire shape at `/g/collect` returned 200, claimed by the pre-installed GA4 client. Root cause: the sGTM Measurement Protocol client is a separate, NOT-pre-installed client with a user-chosen activation path; only the GA client ships by default. Fix shipped in the snippets + README (v=2 `g/collect` wire format, new `GA4_MEASUREMENT_ID` config line; the tag needed ZERO changes because the GA4 client parses `en`/`ep.*`/`dl`/`cid` into exactly the event-data keys the tag already reads). Full matrix and method: `docs/sgtm-mp-collect-verification-2026-08-12.md` in the marketing repo. **Still owed before the word "verified" appears anywhere near Step B:** a Preview-mode observation that the GA4 client parses `ep.bot_ua` with full fidelity and the tag fires with `ep.ai_source=GPTBot` outbound (blocked on 2026-08-12 by the GCP org policy that keeps Cloud Run non-public; use Stape's free tier or a container whose URL is publicly reachable). The second original question (does GA4 retain events whose params carry bot UA strings) also remains open and needs a real GA4 property.
+- **v1.1 (queued 2026-08-06): add `oppref` as a Tier 3 referral signal.** A ChatGPT Ads PAID
+  click that lands with a stripped referrer and no UTM is currently invisible: Tier 3 keys off
+  `utm_source` first and referrer hostname second, and the template has zero `oppref` awareness
+  (verified by grep). The AI-Advisors web app already treats `oppref` alone as a sufficient
+  AI-traffic signal for exactly this case, so today the two disagree about what a paid ChatGPT
+  click is. Cheap fix: one more check in the Tier 3 block reading the `oppref` query param off
+  `page_location`, which the block already parses, so **no new permissions** and no new
+  registry entry. Classify as `chatgpt` / OpenAI, and consider distinguishing paid from organic
+  in `ai_source` rather than collapsing them. Ships as a `metadata.yaml` sha bump (this one
+  touches template.tpl). NOT urgent and NOT caused by any recent change (the template shipped
+  this way), but rising in value as ChatGPT Ads expands markets (Brazil + Mexico) and formats.
+  The `/mp/collect` verification that used to gate this is done (see the resolved item above);
+  the remaining gate is the Preview-mode parse-fidelity observation, which the oppref work can
+  share a container with.
 - **v2, priority order:** IP-range verification against vendor JSON (this is when "verified" enters the vocabulary), a WordPress plugin that emits the ping natively, a web-container companion honestly scoped to referrals only, and `ai-engines.json` as the shared public registry.
 - Support arrives through GitHub Issues. The gallery ToS obligates continued support.

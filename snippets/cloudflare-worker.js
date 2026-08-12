@@ -4,11 +4,20 @@
 // response served to the crawler.
 //
 // 1. Set SGTM_URL to your server container URL (no trailing slash).
-// 2. If you set a Ping secret on the tag, set PING_SECRET to the same value.
-// 3. Deploy as a Worker route covering your site, or merge the waitUntil
+// 2. Set GA4_MEASUREMENT_ID to the same Measurement ID you configured on
+//    the tag. It routes the ping inside your container; the tag decides
+//    where data is sent.
+// 3. If you set a Ping secret on the tag, set PING_SECRET to the same value.
+// 4. Deploy as a Worker route covering your site, or merge the waitUntil
 //    block into your existing Worker.
+//
+// The ping uses the GA4 g/collect wire format because that is what the
+// GA4 client pre-installed in every server container claims. A JSON POST
+// to /mp/collect is NOT claimed by a default container (tested on a live
+// tagging server, 2026-08-12) and would be silently dropped.
 
 const SGTM_URL = "https://sgtm.example.com"; // your server GTM container URL
+const GA4_MEASUREMENT_ID = "G-XXXXXXXXXX"; // same ID as on the tag
 const PING_SECRET = ""; // must match the tag's Ping secret, or leave empty
 
 // Fast prefilter only. The tag's registry is authoritative; keep this regex
@@ -25,21 +34,17 @@ export default {
     const path = new URL(request.url).pathname;
     const match = !ASSET_RE.test(path) && ua.match(AI_CRAWLER_RE);
     if (match) {
-      const params = {
-        bot_ua: ua, // full UA, never truncated here
-        page_location: request.url,
-      };
-      if (PING_SECRET) params.ping_secret = PING_SECRET;
-      const body = JSON.stringify({
-        client_id: "aic." + match[1].toLowerCase().replace("/", ""),
-        events: [{ name: "ai_crawler_ping", params: params }],
+      const qs = new URLSearchParams({
+        v: "2",
+        tid: GA4_MEASUREMENT_ID,
+        cid: "aic." + match[1].toLowerCase().replace("/", ""),
+        en: "ai_crawler_ping",
+        "ep.bot_ua": ua, // full UA, never truncated here
+        dl: request.url,
       });
+      if (PING_SECRET) qs.set("ep.ping_secret", PING_SECRET);
       ctx.waitUntil(
-        fetch(SGTM_URL + "/mp/collect", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body,
-        }).catch(() => {})
+        fetch(SGTM_URL + "/g/collect?" + qs.toString(), { method: "POST" }).catch(() => {})
       );
     }
     return fetch(request);
