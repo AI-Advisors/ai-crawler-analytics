@@ -1,5 +1,12 @@
 homepage: "https://www.ai-advisors.ai"
 documentation: "https://github.com/AI-Advisors/ai-crawler-analytics#readme"
 versions:
+  - sha: 052394419f1b9c7d7a4acb0a6db4679301afa517
+    changeNotes: |2
+      Tier 3 referral detection now recognizes OpenAI's oppref click
+      identifier. Paid ChatGPT Ads clicks with a stripped referrer and no
+      UTM parameters classify as ai_referral_visit with ai_medium paid and
+      detection_method oppref. Precedence is UTM, then oppref, then
+      referrer. No new permissions.
   - sha: 3c47a1b801261039af33da7eeb098007a04e3b09
     changeNotes: Initial release.
