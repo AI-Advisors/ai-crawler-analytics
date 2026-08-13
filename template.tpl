@@ -69,7 +69,7 @@ ___TEMPLATE_PARAMETERS___
         "checkboxText": "Detect AI referral traffic (UTM and referrer)",
         "simpleValueType": true,
         "defaultValue": true,
-        "help": "Classifies human visits that arrive from AI assistants, using utm_source first (it survives referrer stripping) and the referrer hostname second. Applies to page_view events only."
+        "help": "Classifies human visits that arrive from AI assistants, using utm_source first (it survives referrer stripping), then OpenAI's oppref click identifier (present only on paid ChatGPT Ads clicks), then the referrer hostname. Applies to page_view events only."
       }
     ]
   },
@@ -381,11 +381,15 @@ if (!result && data.enableReferralDetection && eventName === 'page_view') {
 
   let utmSource = '';
   let utmMedium = '';
+  let oppref = '';
   if (pageLocation) {
     const pu = parseUrl(pageLocation);
     if (pu && pu.searchParams) {
       utmSource = firstString(pu.searchParams.utm_source).toLowerCase();
       utmMedium = firstString(pu.searchParams.utm_medium).toLowerCase();
+      // oppref is OpenAI's click identifier, appended only to eligible
+      // ChatGPT ad clicks. Opaque value; only its presence matters here.
+      oppref = firstString(pu.searchParams.oppref);
     }
   }
 
@@ -399,6 +403,23 @@ if (!result && data.enableReferralDetection && eventName === 'page_view') {
       aiCategory: 'referral',
       aiMedium: paid ? 'paid' : 'organic',
       detectionMethod: 'utm',
+      includeUa: false
+    };
+  } else if (oppref) {
+    // A paid ChatGPT Ads click that lands with a stripped referrer and no
+    // UTMs is otherwise invisible; oppref survives both, and OpenAI appends
+    // it only to ad clicks, so it is definitive paid evidence. Checked
+    // after UTM (an explicit advertiser tag stays authoritative) and
+    // before the referrer (a chatgpt.com referrer alone cannot separate
+    // paid from organic; oppref can).
+    result = {
+      outName: 'ai_referral_visit',
+      aiType: 'referral',
+      aiSource: 'chatgpt',
+      aiOperator: 'OpenAI',
+      aiCategory: 'referral',
+      aiMedium: 'paid',
+      detectionMethod: 'oppref',
       includeUa: false
     };
   } else {
@@ -841,6 +862,37 @@ scenarios:
       assertThat(sentHttp).hasLength(1);
       assertThat(sentParams(0)['ep.ai_medium']).isEqualTo('paid');
     });
+- name: oppref alone classifies as a paid chatgpt referral
+  code: |-
+    eventData = { event_name: 'page_view', client_id: 'c', user_agent: CHROME_UA, page_location: 'https://www.example.com/landing?oppref=abc123DEF' };
+    runCode(mockData);
+    callLater(() => {
+      assertThat(sentHttp).hasLength(1);
+      assertThat(sentParams(0).en).isEqualTo('ai_referral_visit');
+      assertThat(sentParams(0)['ep.ai_source']).isEqualTo('chatgpt');
+      assertThat(sentParams(0)['ep.ai_operator']).isEqualTo('OpenAI');
+      assertThat(sentParams(0)['ep.ai_medium']).isEqualTo('paid');
+      assertThat(sentParams(0)['ep.detection_method']).isEqualTo('oppref');
+    });
+- name: An explicit UTM outranks oppref
+  code: |-
+    eventData = { event_name: 'page_view', client_id: 'c', user_agent: CHROME_UA, page_location: 'https://www.example.com/?utm_source=perplexity&oppref=abc123' };
+    runCode(mockData);
+    callLater(() => {
+      assertThat(sentHttp).hasLength(1);
+      assertThat(sentParams(0)['ep.ai_source']).isEqualTo('perplexity');
+      assertThat(sentParams(0)['ep.detection_method']).isEqualTo('utm');
+    });
+- name: oppref outranks the referrer hostname
+  code: |-
+    eventData = { event_name: 'page_view', client_id: 'c', user_agent: CHROME_UA, page_location: 'https://www.example.com/?oppref=abc123', page_referrer: 'https://www.perplexity.ai/search' };
+    runCode(mockData);
+    callLater(() => {
+      assertThat(sentHttp).hasLength(1);
+      assertThat(sentParams(0)['ep.ai_source']).isEqualTo('chatgpt');
+      assertThat(sentParams(0)['ep.ai_medium']).isEqualTo('paid');
+      assertThat(sentParams(0)['ep.detection_method']).isEqualTo('oppref');
+    });
 - name: Same-site referrer is discarded
   code: |-
     mock('computeEffectiveTldPlusOne', (url) => 'example.com');
@@ -993,6 +1045,14 @@ ___NOTES___
 AI Crawler Analytics by AI-Advisors
 Repository: https://github.com/ai-advisors/ai-crawler-analytics
 Documentation: see README.md in the repository.
+
+v1.1.0 (2026-08-12)
+- Tier 3 referral detection now recognizes OpenAI's oppref click
+  identifier on the landing URL. A paid ChatGPT Ads click that arrives
+  with a stripped referrer and no UTM parameters was previously
+  invisible; it now classifies as ai_referral_visit with ai_source
+  chatgpt, ai_medium paid, detection_method oppref. Precedence: UTM
+  first, oppref second, referrer hostname third. No new permissions.
 
 v1.0.0 (2026-07-30)
 - Initial release. Three detection tiers: AI crawler user agents (21 built-in

@@ -24,9 +24,9 @@ Three fixed GA4 events, one schema across every install:
 |---|---|---|
 | `ai_crawler_visit` | AI crawlers (GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot, and 16 more) | User agent registry |
 | `ai_agent_visit` | Agentic browsing that identifies itself (ChatGPT agent mode via `Signature-Agent`, Google-Agent) | Header or UA |
-| `ai_referral_visit` | Humans arriving from AI assistants (ChatGPT, Perplexity, Gemini, Copilot, Claude, and more) | UTM first, referrer second |
+| `ai_referral_visit` | Humans arriving from AI assistants (ChatGPT, Perplexity, Gemini, Copilot, Claude, and more) | UTM first, then the `oppref` click ID, then referrer |
 
-Every event carries: `ai_type`, `ai_source`, `ai_operator`, `ai_category` (search / user_initiated / ads / training / agentic / referral), `detection_method`, plus `ai_medium` (organic or paid) on referrals and `bot_ua` on crawler events. Paid AI clicks tagged `utm_source=chatgpt&utm_medium=cpc` surface as `ai_medium=paid` automatically.
+Every event carries: `ai_type`, `ai_source`, `ai_operator`, `ai_category` (search / user_initiated / ads / training / agentic / referral), `detection_method`, plus `ai_medium` (organic or paid) on referrals and `bot_ua` on crawler events. Paid AI clicks tagged `utm_source=chatgpt&utm_medium=cpc` surface as `ai_medium=paid` automatically. Since v1.1, a landing URL carrying OpenAI's `oppref` click identifier also classifies as a paid ChatGPT click (`detection_method=oppref`) even when the referrer is stripped and no UTMs are present; OpenAI appends `oppref` only to eligible ad clicks, which is what makes it safe to treat as paid evidence. An explicit UTM still outranks it.
 
 ## Step A: install the tag (no code, about 5 minutes)
 

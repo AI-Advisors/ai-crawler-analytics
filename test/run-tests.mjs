@@ -222,6 +222,37 @@ t("paid AI click: utm_source=chatgpt + utm_medium=cpc", () => {
   eq(ctx.sentGA.length, 1); eq(ctx.sentGA[0]["ep.ai_medium"], "paid");
 });
 
+t("oppref alone: paid chatgpt referral (stripped referrer, no UTM)", () => {
+  const ctx = baseCtx();
+  ctx.eventData = { event_name: "page_view", client_id: "c", user_agent: CHROME_UA, page_location: "https://www.example.com/landing?oppref=abc123DEF" };
+  runTemplate(baseData(), ctx);
+  eq(ctx.sentGA.length, 1);
+  eq(ctx.sentGA[0].en, "ai_referral_visit");
+  eq(ctx.sentGA[0]["ep.ai_source"], "chatgpt");
+  eq(ctx.sentGA[0]["ep.ai_operator"], "OpenAI");
+  eq(ctx.sentGA[0]["ep.ai_medium"], "paid");
+  eq(ctx.sentGA[0]["ep.detection_method"], "oppref");
+});
+
+t("explicit UTM outranks oppref", () => {
+  const ctx = baseCtx();
+  ctx.eventData = { event_name: "page_view", client_id: "c", user_agent: CHROME_UA, page_location: "https://www.example.com/?utm_source=perplexity&oppref=abc123" };
+  runTemplate(baseData(), ctx);
+  eq(ctx.sentGA.length, 1);
+  eq(ctx.sentGA[0]["ep.ai_source"], "perplexity");
+  eq(ctx.sentGA[0]["ep.detection_method"], "utm");
+});
+
+t("oppref outranks the referrer hostname", () => {
+  const ctx = baseCtx();
+  ctx.eventData = { event_name: "page_view", client_id: "c", user_agent: CHROME_UA, page_location: "https://www.example.com/?oppref=abc123", page_referrer: "https://www.perplexity.ai/search" };
+  runTemplate(baseData(), ctx);
+  eq(ctx.sentGA.length, 1);
+  eq(ctx.sentGA[0]["ep.ai_source"], "chatgpt");
+  eq(ctx.sentGA[0]["ep.ai_medium"], "paid");
+  eq(ctx.sentGA[0]["ep.detection_method"], "oppref");
+});
+
 t("same-site referrer discarded (mocked eTLD+1)", () => {
   const ctx = baseCtx();
   ctx.mockTld = () => "example.com";
