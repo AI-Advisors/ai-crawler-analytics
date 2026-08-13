@@ -12,7 +12,23 @@ An earlier version of this file attributed stape's 1.4M "Frame" backlinks to tem
 
 So: **installs, citations, and credibility are the goal.** A feature that adds an install is worth more than a feature that adds capability. A claim that costs credibility costs more than any feature is worth.
 
-Status: submitted to the gallery 2026-07-30, pending review. Marketing site: `~/Projects/ai-advisors` (separate repo, separate CLAUDE.md).
+Status: submitted to the gallery 2026-07-30. **Still pending as of 2026-08-12 (day 13) - verified NOT live, not assumed.** Marketing site: `~/Projects/ai-advisors` (separate repo, separate CLAUDE.md).
+
+### Gallery status checks
+
+There is no queue position, no status page, and no email. Approval shows up only as the template appearing in the gallery, so the check is: look for it, with a control.
+
+| Date | Result | Method |
+|---|---|---|
+| 2026-08-12 (day 13) | **Not live** | Gallery search "AI Crawler" returned only "Bot Score by New North". Server-platform list (335 templates) has no AI-Advisors entry. Direct URL `#/owners/AI-Advisors/templates/ai-crawler-analytics` renders blank. |
+
+**Always run the control, or a blank page proves nothing.** The gallery is a hash-routed SPA and a deep link that renders empty can mean "absent" or "deep links do not render". Load a known-live template at the same URL shape first: `#/owners/ClickPatrol/templates/google-tag-manager` renders the name, author, "Add to workspace" and description. If the control renders and ours does not, ours is absent.
+
+Two mechanics worth not rediscovering: the template slug in that URL is the **repo name**, not the template's display name. And hash-only changes do not re-route - set `location.href` then `location.reload()`, or click through from the list.
+
+Gallery total was 1,629 at the 2026-07-30 prior-art scan and 1,630 on 2026-08-12. That +1 is not ours; do not read the counter as a proxy for our status.
+
+Timing expectation: Google says "at least a few days", community reports say weeks. Day 13 is inside the normal band and is not evidence of rejection. **Next check 2026-08-29** (the 30-day mark), at which point silence is worth chasing.
 
 ## The rules that are not negotiable
 
