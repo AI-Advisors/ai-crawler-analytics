@@ -21,6 +21,7 @@ There is no queue position, no status page, and no email. Approval shows up only
 | Date | Result | Method |
 |---|---|---|
 | 2026-08-12 (day 13) | **Not live** | Gallery search "AI Crawler" returned only "Bot Score by New North". Server-platform list (335 templates) has no AI-Advisors entry. Direct URL `#/owners/AI-Advisors/templates/ai-crawler-analytics` renders blank. |
+| 2026-09-03 (day 35) | **Not live** | Control (`ClickPatrol/google-tag-manager`) renders 1,800 chars of detail page; ours renders **26 chars** (title only). Gallery search "AI Crawler" returns nothing at all. Gallery total 1,634, up 4 from 1,630 on 08-12 - none of those 4 is ours. No issue, PR or any other signal from Google on the repo. |
 
 **Always run the control, or a blank page proves nothing.** The gallery is a hash-routed SPA and a deep link that renders empty can mean "absent" or "deep links do not render". Load a known-live template at the same URL shape first: `#/owners/ClickPatrol/templates/google-tag-manager` renders the name, author, "Add to workspace" and description. If the control renders and ours does not, ours is absent.
 
@@ -28,7 +29,13 @@ Two mechanics worth not rediscovering: the template slug in that URL is the **re
 
 Gallery total was 1,629 at the 2026-07-30 prior-art scan and 1,630 on 2026-08-12. That +1 is not ours; do not read the counter as a proxy for our status.
 
-Timing expectation: Google says "at least a few days", community reports say weeks. Day 13 is inside the normal band and is not evidence of rejection. **Next check 2026-08-29** (the 30-day mark), at which point silence is worth chasing.
+Timing expectation: Google says "at least a few days", community reports say weeks. Day 13 was inside the normal band.
+
+**Day 35 (2026-09-03) is past the 30-day mark and no longer unremarkable.** Still not evidence of rejection - Google's gallery review has no SLA, no status page, no queue position, and no rejection notice; the only observable states are "absent" and "present". But the useful reading has shifted from "wait, this is normal" to "this is slow, and we have no channel to ask".
+
+What is known and should not be re-derived: the 2026-08-12 re-submission attempt returned Google's own **"The template has already been submitted for consideration"**, so the 07-30 submission is registered and in the queue. There is no support channel for gallery review, so **chasing is not actually available** - the honest options are keep waiting or let it go. Do not re-submit; the form rejects it and it adds nothing.
+
+**Next check 2026-10-03** (day 65). If it is still absent then, treat the gallery as a channel that did not pay out rather than one still pending, and stop spending checks on it. The artifact itself is public on GitHub and useful regardless of gallery listing.
 
 ## The rules that are not negotiable
 
