@@ -1,6 +1,8 @@
 homepage: "https://www.ai-advisors.ai"
 documentation: "https://github.com/AI-Advisors/ai-crawler-analytics#readme"
 versions:
+  - sha: 2e3bda09b36a56c3236458ca5b78a97a74000ea6
+    changeNotes: Updated brand icon. No behaviour changes.
   - sha: 052394419f1b9c7d7a4acb0a6db4679301afa517
     changeNotes: |2
       Tier 3 referral detection now recognizes OpenAI's oppref click
